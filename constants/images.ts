@@ -1,4 +1,4 @@
-import avatar from '@/assets/images/avatar.png';
-import { SplashScreen } from 'expo-router';
+import avatar from "@/assets/images/avatar.png";
+import splashPattern from "@/assets/images/splash-pattern.png";
 
-export default { SplashScreen, avatar }
+export default { splashPattern, avatar }
