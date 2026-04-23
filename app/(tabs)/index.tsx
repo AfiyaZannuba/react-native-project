@@ -1,25 +1,35 @@
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
-import { HOME_BALANCE, HOME_SUBSCRIPTIONS, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
+import { HOME_BALANCE, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
 import { formatCurrency } from "@/constants/lib/utils";
+import { useSubscriptions } from "@/contexts/SubscriptionContext";
 import "@/global.css";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
 import { styled } from "nativewind";
 import React, { useState } from "react";
-import { FlatList, Image, Text, View } from "react-native";
+import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 const SafeAreaView = styled(RNSafeAreaView);
+const StyledPressable = styled(Pressable);
+
 export default function App() {
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const { subscriptions, addSubscription, isLoading } = useSubscriptions();
   const { user, isLoaded } = useUser();
 
-  if (!isLoaded) return null; // or loader
+  if (!isLoaded || isLoading) return null; // or loader
   const displayName = user?.firstName || user?.fullName || user?.emailAddresses[0]?.emailAddress || 'User';
+
+  const handleCreateSubscription = (newSubscription: Subscription) => {
+    addSubscription(newSubscription);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
@@ -35,7 +45,9 @@ export default function App() {
                 </Text>
               </View>
 
-              <Image source={icons.add} className="home-add-icon" />
+              <StyledPressable onPress={() => setModalVisible(true)}>
+                <Image source={icons.add} className="home-add-icon" />
+              </StyledPressable>
             </View>
 
             <View className="home-balance-card">
@@ -70,7 +82,7 @@ export default function App() {
             <ListHeading title="All Subscriptions" />
           </>
         )}
-        data={HOME_SUBSCRIPTIONS}
+        data={subscriptions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <SubscriptionCard
@@ -84,6 +96,11 @@ export default function App() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={<Text className="home-empty-state">No Subscriptions Yet.</Text>}
         contentContainerClassName="pb-30"
+      />
+      <CreateSubscriptionModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onCreateSubscription={handleCreateSubscription}
       />
     </SafeAreaView>
   );
