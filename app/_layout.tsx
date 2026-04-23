@@ -1,10 +1,11 @@
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import '@/global.css';
 import { ClerkProvider } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from 'expo-router';
-import { useEffect } from 'react';
 import { PostHogProvider } from 'posthog-react-native';
+import { useEffect } from 'react';
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -36,7 +37,9 @@ export default function RootLayout() {
       options={{ host: process.env.EXPO_PUBLIC_POSTHOG_HOST }}
     >
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-        <Slot />
+        <SubscriptionProvider>
+          <Slot />
+        </SubscriptionProvider>
       </ClerkProvider>
     </PostHogProvider>
   );
